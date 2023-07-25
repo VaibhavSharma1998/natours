@@ -1,47 +1,57 @@
-const fs = require('fs');
+const Tour = require('../models/tourModel');
 
-const tours = JSON.parse(fs.readFileSync('./dev-data/data/tours-simple.json'));
+// const fs = require('fs');
 
-exports.checkId = (req,res,next,value)=>{
-  console.log(`The id is :${value}`)
+// const tours = JSON.parse(fs.readFileSync('./dev-data/data/tours-simple.json'));
 
-  if (req.params.id > tours) {
-    return res.status(404).json({
+// exports.checkId = (req,res,next,value)=>{
+//   console.log(`The id is :${value}`)
+
+//   if (req.params.id > tours) {
+//     return res.status(404).json({
+//       status: 'Fail',
+//       message: 'Invaild Id',
+//     });
+//   }
+//   next()
+// }
+
+// exports.checkBody = (req,res,next)=>{
+//   if(!req.body.name || !req.body.price){
+//     return res.status(400).json({
+//       status:'Bad request',
+//       message:'Name or price is not there'
+//     })
+//   }
+//   next()
+// }
+// div is only used to hide it
+
+exports.getAllTours = async (req, res) => {
+  try {
+    const findTours = await Tour.find();
+    res.status(200).json({
+      status: 'Sucess',
+      result: findTours.length,
+      data: {
+        findTours,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
       status: 'Fail',
-      message: 'Invaild Id',
+      message: 'Page not found',
     });
   }
-  next()
-}
-
-exports.checkBody = (req,res,next)=>{
-  if(!req.body.name || !req.body.price){
-    return res.status(400).json({
-      status:'Bad request',
-      message:'Name or price is not there'
-    })
-  }
-  next()
-}
-
-exports.getAllTours = (req, res) => {
-  res.status(200).json({
-    status: 'Sucess',
-    request: req.requestTime,
-    result: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
 };
 
-exports.getTour = (req, res) => {
-  console.log(req.params);
+exports.getTour = async (req, res) => {
+  // console.log(req.params);
 
   // Used for converting the id which is string to a number
-  const id = req.params.id * 1;
+  // const id = req.params.id * 1;
 
-  const tour = tours.find((el) => el.id === id);
+  // const tour = tours.find((el) => el.id === id);
 
   // If the id is not inside the tours array then send this 404 status method 1
 
@@ -54,52 +64,92 @@ exports.getTour = (req, res) => {
 
   // If the id is not inside the tours array then send this 404 status method 2
 
-  if (id > tours.length) {
-    return res.status(404).json({
-      status: 'Fail',
-      messagae: 'Data not found!',
+  // if (id > tours.length) {
+  //   return res.status(404).json({
+  //     status: 'Fail',
+  //     messagae: 'Data not found!',
+  //   });
+  // }
+  try{
+    const getTourById = await Tour.findById(req.params.id)
+    res.status(200).json({
+      status:'Success',
+      data:{
+        getTourById
+      }
+    })
+  } catch(err){
+    res.status(404).json({
+      status:'Failed',
+      message:err
+    })
+  }
+
+};
+
+exports.createTour = async (req, res) => {
+  try {
+    const newTour = await Tour.create(req.body);
+    res.status(201).json({
+      status: 'Success',
+      data: {
+        value: newTour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'failed',
+      message: err,
     });
   }
-  res.status(200).json({
-    status: 'Suceess',
+};
+
+// fs.writeFile(
+//   './dev-data/data/tours-simple.json',
+//   JSON.stringify(tours),
+//   (err) => {
+//     res.status(201).json({
+//       status: 'Suceees',
+//       data: {
+//         tours: newTours,
+//       },
+//     });
+//   }
+// );
+
+exports.updateTour = async (req, res) => {
+  try {
+    const findTourById = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators:true
+    });
+    res.status(200).json({
+      status: 'Sucess',
+      data: {
+        tours:findTourById
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'Failed',
+      message: err,
+    });
+  }
+};
+
+exports.deleteTour = async(req, res) => {
+  try{
+  const deleteById = await Tour.findByIdAndRemove(req.params.id)
+  res.status(204).json({
+    status: 'Sucess',
     data: {
-      tours: tour,
-    },
-  });
-};
-
-exports.createTour = (req, res) => {
-  // console.log(req.body)
-  const newId = tours[tours.length - 1].id + 1;
-  const newTours = Object.assign({ id: newId }, req.body);
-  tours.push(newTours);
-
-  fs.writeFile(
-    './dev-data/data/tours-simple.json',
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: 'Suceees',
-        data: {
-          tours: newTours,
-        },
-      });
+      deleteById
     }
-  );
-};
-
-exports.updateTour = (req, res) => {
- 
-  res.status(204).json({
-    status: 'Sucess',
-    data: null,
   });
-};
-
-exports.deleteTour = (req, res) => {
-  
-  res.status(204).json({
-    status: 'Sucess',
-    data: null,
-  });
+}  catch(err){
+  res.status(404).json({
+    status:'Failed',
+    message:err
+  })
+}
 };
