@@ -1,29 +1,67 @@
-
 const mongoose = require('mongoose');
 
+// mongoose Schema  and model
 
-  // mongoose Schema  and model
-  
-  const tourSchema = new mongoose.Schema({
-    name: {
-      type: String,
-      required: [true, 'A tour must have a name'],
-      unique: true,
-    },
-    rating: {
-      type: Number,
-      default: 4.7,
-    },
-    price: {
-      type: Number,
-      required: [true, 'A Tour must have a price'],
-    }
-  });
-  
-  // mongoose model
-  const Tour = mongoose.model('Tour', tourSchema);
-  
-  // creating document to connect express with md
+const tourSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    trim: true,
+    required: [true, 'A tour must have a name'],
+    unique: true,
+  },
+  duration: {
+    type: Number,
+    required: [true, 'A tour must have a duration'],
+  },
+  maxGroupSize: {
+    type: Number,
+    required: [true, 'A tour must have a group size'],
+  },
+  difficulty: {
+    type: String,
+    required: [true, 'A tour must have a difficulty'],
+  },
+  ratingsAverage: {
+    type: Number,
+    default: 4.7,
+  },
+  ratingsQuantity: {
+    type: Number,
+    default: 0,
+  },
+
+  price: {
+    type: Number,
+    required: [true, 'A Tour must have a price'],
+  },
+  priceDiscount: {
+    type: Number,
+  },
+  summary: {
+    type: String,
+    trim: true,
+    required: [true, 'A Tour must have a summary'],
+  },
+  discription: {
+    type: String,
+    trim: true,
+  },
+  imageCover: {
+    type: String,
+    required: [true, 'A tour must have a image'],
+  },
+  images: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  startDates: [Date],
+});
+
+// mongoose model
+const Tour = mongoose.model('Tour', tourSchema);
+
+// creating document to connect express with md
 
 // We only create this for testing purpose
 
@@ -32,7 +70,7 @@ const mongoose = require('mongoose');
 //     rating: 4.5,
 //     price: 5000,
 //   });
-  
+
 //   testTour
 //     .save()
 //     .then((doc) => {
@@ -41,6 +79,5 @@ const mongoose = require('mongoose');
 //     .catch((err) => {
 //       console.log('Error:', err);
 //     });
-
 
 module.exports = Tour;
