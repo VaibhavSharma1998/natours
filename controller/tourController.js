@@ -29,7 +29,22 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    const findTours = await Tour.find();
+    // Build a query
+    const queryObj = {...req.query}
+    let exculdedFields = ['page','sort','limit','fields']
+    exculdedFields.map(el => delete queryObj[el])
+    console.log(req.query,queryObj)
+
+    const query  =  Tour.find(queryObj);
+
+// Mongoose method for filtering 
+
+    // const query = Tour.find().where('difficulty').equals('easy')
+
+// Execute a query
+    const findTours = await query
+
+    // send response
     res.status(200).json({
       status: 'Sucess',
       result: findTours.length,
