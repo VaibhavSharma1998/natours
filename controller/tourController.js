@@ -37,7 +37,7 @@ exports.getAllTours = async (req, res) => {
     exculdedFields.map((el) => delete queryObj[el]);
     console.log(req.query, queryObj);
 
-    // 2)Advanced Filtering
+    // 1a)Advanced Filtering
     let queryString = JSON.stringify(queryObj);
     queryString = queryString.replace(
       /\b(gt|gte|lt|lte)\b/,
@@ -46,19 +46,24 @@ exports.getAllTours = async (req, res) => {
     //  console.log(queryString)
     let query = Tour.find(JSON.parse(queryString));
 
-    // Sorting
+    // 2)Sorting
 
     if (req.query.sort) {
       query = query.sort(req.query.sort);
+    } else{
+      query = query.sort('-createdAt')
     }
 
-    // Mongoose method for filtering
+    // 3) Fields
+    
+    if(req.query.fields){
+      let queryFields = req.query.fields.split(',').join(' ')
+      query = query.select(queryFields)
+     } else{
+      query =  query.select('-__v')
+     }
 
-    // const query = Tour.find().where('difficulty').equals('easy')
-
-    // Execute a query
-
-    // 2) Advanced Filtering
+   
     const findTours = await query;
 
     // send response
